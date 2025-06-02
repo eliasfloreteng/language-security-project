@@ -1,7 +1,22 @@
 [project]
 name = "language-security-project"
 version = "0.1.0"
-description = "Add your description here"
+description = "Python Pickle Module Security Vulnerability Demonstration"
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = ["flask>=2.3.0", "msgpack>=1.0.0"]
+
+[project.optional-dependencies]
+dev = ["black", "flake8", "pytest"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.black]
+line-length = 88
+target-version = ['py313']
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
