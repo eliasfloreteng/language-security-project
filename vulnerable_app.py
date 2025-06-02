@@ -4,7 +4,7 @@ import pickle
 def run_vulnerable_app():
     print("Vulnerable application is attempting to load data...")
     try:
-        with open("data.pickle", "rb") as f:
+        with open("benign.pickle", "rb") as f:
             data = pickle.load(f)
         print(f"Successfully unpickled: {data}")
     except Exception as e:
