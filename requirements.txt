@@ -1,0 +1,35 @@
+# Core dependencies for the pickle security demonstration project
+# These are required for the web application and HTTP-based demonstrations
+
+flask>=2.3.0
+requests>=2.31.0
+
+# Optional dependencies for enhanced features
+# Install with: pip install -r requirements.txt
+
+# MessagePack for safe serialization alternatives
+msgpack>=1.0.0
+
+# Development and analysis tools (optional)
+# pickletools is part of Python standard library
+# These can be useful for payload analysis
+
+# For enhanced web interface (optional)
+jinja2>=3.1.0
+
+# Note: All other dependencies are part of Python standard library:
+# - pickle (built-in, but vulnerable!)
+# - json (built-in, safe)
+# - hmac (built-in, for secure pickle)
+# - hashlib (built-in, for HMAC)
+# - base64 (built-in, for encoding)
+# - os (built-in, used in exploits)
+# - sys (built-in)
+# - datetime (built-in)
+# - dataclasses (built-in, Python 3.7+)
+# - typing (built-in, Python 3.5+)
+# - pathlib (built-in, Python 3.4+)
+# - tempfile (built-in)
+# - threading (built-in)
+# - subprocess (built-in, used in exploits)
+# - time (built-in)
