@@ -1,4 +1,4 @@
-# Python Pickle Module Offline Tampering Attack
+# Python Pickle Module Security Vulnerability Demonstration
 
 ## Background
 
