@@ -4,8 +4,14 @@ import io
 
 app = Flask(__name__)
 
-# Simple in-memory diary storage
-diary_content = ""
+
+class Diary:
+    def __init__(self, content=""):
+        self.content = content
+
+
+# Global diary object
+diary_object = Diary("Welcome to your diary!")
 
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -41,17 +47,17 @@ HTML_TEMPLATE = """
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    global diary_content
+    global diary_object
     if request.method == "POST":
-        diary_content = request.form["diary_entry"]
-    return render_template_string(HTML_TEMPLATE, diary_content=diary_content)
+        diary_object.content = request.form["diary_entry"]
+    return render_template_string(HTML_TEMPLATE, diary_content=diary_object.content)
 
 
 @app.route("/download")
 def download_diary():
-    global diary_content
-    # Pickle the diary content
-    pickled_data = pickle.dumps(diary_content)
+    global diary_object
+    # Pickle the diary object
+    pickled_data = pickle.dumps(diary_object)
     # Create a BytesIO object to serve the file from memory
     return send_file(
         io.BytesIO(pickled_data),
@@ -63,7 +69,7 @@ def download_diary():
 
 @app.route("/upload", methods=["POST"])
 def upload_diary():
-    global diary_content
+    global diary_object
     if "diary_file" not in request.files:
         return "No file part", 400
     file = request.files["diary_file"]
@@ -72,13 +78,10 @@ def upload_diary():
     if file:
         try:
             # Load the pickled data
-            loaded_data = pickle.loads(file.read())
-            # Assuming the loaded data is a string for the diary content
-            if isinstance(loaded_data, str):
-                diary_content = loaded_data
-                return "Diary uploaded successfully! <a href='/'>Go back</a>"
-            else:
-                return "Invalid pickle file content. Expected a string.", 400
+            loaded_object = pickle.loads(file.read())
+            # Assign the loaded object to diary_object
+            diary_object = loaded_object
+            return "Diary uploaded successfully! <a href='/'>Go back</a>"
         except Exception as e:
             return f"Error loading pickle file: {e}", 400
     return "Something went wrong", 500
