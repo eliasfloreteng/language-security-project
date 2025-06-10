@@ -22,6 +22,29 @@ This scenario demonstrates how an attacker can modify a pickled file stored on d
 - `offline_tampering/generate_malicious_pickle.py`: This script crafts a malicious pickled payload. The payload leverages the `__reduce__` method to execute a system command (e.g., `echo Malicious code executed!`) when unpickled. The `__reduce__` method is a special method in Python that allows objects to define how they should be pickled. When an object implementing `__reduce__` is pickled, this method is called, and its return value (a string or a tuple) dictates how the object is represented in the pickle stream. If a tuple is returned, its first element is a callable object, and the second is a tuple of arguments for that callable. During unpickling, this callable is invoked with the provided arguments. Attackers can abuse this mechanism by making `__reduce__` return a dangerous callable (like `os.system` or `eval`) and a malicious command as its argument, leading to arbitrary code execution.
 - `offline_tampering/secure_app.py`: This script demonstrates a safer approach to handling pickled data by using HMAC (Hash-based Message Authentication Code) to verify the integrity of the pickled data before unpickling.
 
+To run this demonstration:
+
+1.  **Generate a malicious and a benign pickle file:**
+    Run `generate_malicious_pickle.py` to create a malicious `malicious.pickle` file and a `malicious_hmac.pickle` file that contains an invalid HMAC signature (because the malicious actor does not know the secret key).
+
+    ```bash
+    python offline_tampering/generate_malicious_pickle.py
+    ```
+
+2.  **Execute the vulnerable application with malicious data:**
+    Run `vulnerable_app.py`. It will load and unpickle the malicious `malicious.pickle` file, leading to arbitrary code execution.
+
+    ```bash
+    python offline_tampering/vulnerable_app.py
+    ```
+
+3.  **Demonstrate the secure application:**
+    To see how the `secure_app.py` prevents this attack, you can run it. It will attempt to load `malicious_hmac.pickle` but will detect the tampering due to invalid HMAC verification.
+
+    ```bash
+    python offline_tampering/secure_app.py
+    ```
+
 ### 2. Web App Demonstration
 
 This scenario illustrates how deserialization vulnerabilities can lead to Remote Code Execution (RCE) in web applications if a web endpoint deserializes untrusted data directly from user input. This also highlights a potential risk in supply-chain attacks, where a legitimate GitHub repository or a third-party library might inadvertently contain or use a maliciously crafted pickle file, compromising systems that import or process it.
