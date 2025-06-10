@@ -20,11 +20,19 @@ def generate_malicious_pickle():
         f.write(pickled_data)
     print("Malicious payload saved to malicious.pickle")
 
-    with open("malicious_hmac.pickle", "wb") as f:
+    with open("malicious_hmac_valid.pickle", "wb") as f:
+        # Create a HMAC signature for the malicious data
+        signature = hmac.new(b"secret_key", pickled_data, hashlib.sha256).digest()
+        f.write(signature + b"\n" + pickled_data)
+    print("Malicious payload saved to malicious_hmac_valid.pickle with valid signature")
+
+    with open("malicious_hmac_invalid.pickle", "wb") as f:
         # Create a HMAC signature for the malicious data
         signature = hmac.new(b"attacker_key", pickled_data, hashlib.sha256).digest()
         f.write(signature + b"\n" + pickled_data)
-    print("Malicious payload saved to malicious_hmac.pickle with signature")
+    print(
+        "Malicious payload saved to malicious_hmac_invalid.pickle with invalid signature"
+    )
 
 
 if __name__ == "__main__":
