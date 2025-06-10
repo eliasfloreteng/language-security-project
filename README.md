@@ -10,20 +10,48 @@ This project aims to explore the security risks associated with Python's `pickle
 
 The project directly relates to the Language-Based Security course, as it investigates language features (serialization and deserialization) and their exploitation in Python, a mainstream programming language. By focusing on the pickle module, we will examine how language design and unsafe library APIs contribute to common vulnerabilities. This work will reinforce core course concepts such as secure API design and deserialization attacks.
 
-## Method
+## Methodology
 
-To demonstrate the attack, we will create two Python scripts:
+This project includes two main demonstrations of pickle deserialization vulnerabilities:
 
-1.  `vulnerable_app.py`: This script will simulate a simple application that loads a pickled object from a file. It represents a common scenario where an application might deserialize data without proper validation.
-2.  `exploit.py`: This script will craft a malicious pickled payload. The payload will leverage the `__reduce__` method to execute a system command (`echo Malicious code executed!`) when unpickled.
-    The `__reduce__` method is a special method in Python that allows objects to define how they should be pickled. When an object implementing `__reduce__` is pickled, this method is called, and its return value (a string or a tuple) dictates how the object is represented in the pickle stream. If a tuple is returned, its first element is a callable object, and the second is a tuple of arguments for that callable. During unpickling, this callable is invoked with the provided arguments. Attackers can abuse this mechanism by making `__reduce__` return a dangerous callable (like `os.system` or `eval`) and a malicious command as its argument, leading to arbitrary code execution.
-3.  `run_attack.py`: This script will orchestrate the attack by first pickling a benign object, then demonstrating how an attacker could replace it with a malicious payload, and finally showing the vulnerable application unpickling the malicious data.
+### 1. Offline Tampering
 
-This vulnerability can manifest as an **offline tampering attack** where an attacker modifies a pickled file stored on disk. If the application later loads this tampered file, the malicious code executes. In the context of web applications, this can be even more dangerous, potentially leading to Remote Code Execution (RCE) if a web endpoint deserializes untrusted data directly from user input. Furthermore, this vulnerability poses a significant risk in **supply-chain attacks**, where a legitimate GitHub repository or a third-party library might inadvertently contain or use a maliciously crafted pickle file, compromising systems that import or process it.
+This scenario demonstrates how an attacker can modify a pickled file stored on disk to achieve arbitrary code execution when a vulnerable application later loads the tampered file.
+
+- `offline_tampering/vulnerable_app.py`: This script simulates a simple application that loads a pickled object from a file (`data.pickle`). It represents a common scenario where an application might deserialize data without proper validation.
+- `offline_tampering/generate_malicious_pickle.py`: This script crafts a malicious pickled payload. The payload leverages the `__reduce__` method to execute a system command (e.g., `echo Malicious code executed!`) when unpickled. The `__reduce__` method is a special method in Python that allows objects to define how they should be pickled. When an object implementing `__reduce__` is pickled, this method is called, and its return value (a string or a tuple) dictates how the object is represented in the pickle stream. If a tuple is returned, its first element is a callable object, and the second is a tuple of arguments for that callable. During unpickling, this callable is invoked with the provided arguments. Attackers can abuse this mechanism by making `__reduce__` return a dangerous callable (like `os.system` or `eval`) and a malicious command as its argument, leading to arbitrary code execution.
+- `offline_tampering/secure_app.py`: This script demonstrates a safer approach to handling pickled data by using HMAC (Hash-based Message Authentication Code) to verify the integrity of the pickled data before unpickling.
+
+### 2. Web App Demonstration
+
+This scenario illustrates how deserialization vulnerabilities can lead to Remote Code Execution (RCE) in web applications if a web endpoint deserializes untrusted data directly from user input. This also highlights a potential risk in supply-chain attacks, where a legitimate GitHub repository or a third-party library might inadvertently contain or use a maliciously crafted pickle file, compromising systems that import or process it.
+
+- `web_app/diary_app.py`: This is a Flask web application that simulates a simple diary. It allows users to "save" and "load" diary entries, which are serialized using `pickle`. The vulnerability lies in the "load" functionality, which directly unpickles user-provided data without proper validation.
+- `web_app/generate_malicious_diary.py`: This script generates a malicious pickled diary entry that, when unpickled by `diary_app.py`, will execute arbitrary code on the server.
+
+To run this demonstration:
+
+1.  Generate the malicious payload:
+
+```bash
+python web_app/generate_malicious_diary.py
+```
+
+2.  Start the Flask web application:
+
+```bash
+python web_app/diary_app.py
+```
+
+3. Access the web application in your browser at `http://localhost:5000/`. Use the "Load Diary" functionality to load the malicious diary entry. The server will execute the code embedded in the pickled data, demonstrating the RCE vulnerability.
 
 ## Results
 
-When `vulnerable_app.py` attempts to unpickle the malicious data generated by `exploit.py`, the system command embedded within the payload will be executed. This demonstrates the arbitrary code execution vulnerability inherent in unpickling untrusted data. The output "Malicious code executed!" will confirm the successful execution of the injected command, highlighting how easily an attacker can achieve control over the system by manipulating serialized data. This successful demonstration underscores the critical importance of validating and securing deserialization processes, especially when dealing with data from untrusted sources.
+For the **Offline Tampering** demonstration, when `offline_tampering/vulnerable_app.py` attempts to unpickle the malicious data generated by `offline_tampering/generate_malicious_pickle.py`, the system command embedded within the payload will be executed. This demonstrates the arbitrary code execution vulnerability inherent in unpickling untrusted data. The output "Malicious code executed!" will confirm the successful execution of the injected command, highlighting how easily an attacker can achieve control over the system by manipulating serialized data.
+
+For the **Web App Demonstration**, when a malicious pickled diary entry generated by `web_app/generate_malicious_diary.py` is sent to and unpickled by `web_app/diary_app.py`, the arbitrary code embedded within the payload will be executed on the server. This demonstrates Remote Code Execution (RCE) in a web application context.
+
+Both demonstrations underscore the critical importance of validating and securing deserialization processes, especially when dealing with data from untrusted sources.
 
 ## Mitigation Strategies
 
