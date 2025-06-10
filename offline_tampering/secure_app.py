@@ -5,7 +5,7 @@ import hashlib
 
 def run_secure_app():
     print("Secure application is attempting to load data...")
-    with open("secure.pickle", "rb") as f:
+    with open("malicious_hmac.pickle", "rb") as f:
         # Read the signature and pickled data
         signature = f.readline().strip()
         pickled_data = f.read()
