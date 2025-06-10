@@ -1,10 +1,8 @@
 # Python Pickle Module Security Vulnerability Demonstration
 
-## Background
+This project explores the security risks of Python's `pickle` module, which is used for serializing and deserializing objects but is explicitly insecure for untrusted data, as maliciously crafted pickle data can lead to arbitrary code execution during unpickling. The goal is to demonstrate how manipulated pickled files can achieve arbitrary code execution and to propose mitigation strategies or safer alternatives for deserializing Python objects. This work is part of the Language-Based Security course at KTH (DD2525).
 
-Python's `pickle` module is used for serializing and deserializing Python objects. "Pickling" converts a Python object hierarchy into a byte stream, and "unpickling" converts that byte stream back into an object hierarchy. While convenient for persisting data or inter-process communication, the `pickle` module is explicitly documented as **not secure** for untrusted data. Maliciously crafted pickle data can lead to arbitrary code execution during the unpickling process. This vulnerability arises because the pickle byte stream contains opcodes that are executed sequentially upon deserialization, including the ability to call arbitrary functions with supplied arguments via the `__reduce__` method.
-
-## Methodology
+## Demonstrations
 
 This project includes two main demonstrations of pickle deserialization vulnerabilities:
 
